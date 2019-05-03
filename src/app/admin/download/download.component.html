@@ -1,0 +1,131 @@
+<div class="row">
+	<nb-card class="col-md-6" status="info">
+		<nb-card-header>
+			Download Excel Year Wise
+		</nb-card-header>
+		<div class="row"><h3 class="offset-lg-1 ">Select Year:</h3></div>
+		<div class="row">
+			<mat-form-field class="col-lg-6 ">
+				<mat-select placeholder="select Year" [(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear($event)" >
+					<mat-option value="2017">2017-2018</mat-option>
+					<mat-option value="2018">2018-2019</mat-option>
+					<mat-option value="2019">2019-2020</mat-option>
+				</mat-select>
+			</mat-form-field>
+		</div>
+	</nb-card>
+	<!-- <nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					First Payment Student Excel
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="downloadFirstPaymentStudentExcel()">First Payment Student Excel Export</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card> -->
+</div>
+<div class="row">
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					Second Payment Student Excel
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="downloadStudentExcel()">
+						<a id="excel2nd">
+							Second Payment Student Excel Export
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card>
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					Seats/Intake Excel Export
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="showSeatsExcel()">
+						<a id="seatExcel">
+							Seats/Intake Excel Export
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card>
+</div>
+<div class="row">
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					ICCR Student Excel Export
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="ICCRExcel()">
+						<a id="iccrStudent">
+							ICCR Student Excel Export
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card>
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					Excel Sheet with all payment Details 
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="paymentDetailsExcel()">
+						<a id="allPayment">
+							Excel Sheet with all payment Details 
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card>
+</div>
+<div class="row">
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					Third Payment Student Excel Export
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="showThirdPaymentExcel()">
+						<a id="payment3rd">
+							Third Payment Student Excel Export
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card>
+	<nb-card class="col-md-6" status="info">
+		<nb-card-body>
+			<nb-card>
+				<nb-card-header>
+					College Allocated Students 
+				</nb-card-header>
+				<nb-card-body>
+					<button nbButton outline status="primary" (click)="showCollegeAllocatedExcel()">
+						<a id="colAllocation">
+							College Allocated Students Excel Export
+						</a>
+					</button>
+				</nb-card-body>
+			</nb-card>
+		</nb-card-body>
+	</nb-card> 
+</div>

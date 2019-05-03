@@ -1,0 +1,88 @@
+<nb-card>
+	<nb-card-body>
+		<div class="titleWrap">
+			<label>Student Management</label>
+		</div>	
+		<div class="row tablessWrap">
+			<div class="col-lg-6 studentStatusCount">Total number of <font color="#71ab30"><b>active</b></font> students: <b>{{active?.active}}</b></div>
+			<div class="col-lg-6 studentStatusCount">Total number of <font color="#dc072a"><b>inactive</b></font> students: <b>{{active?.inactive}}</b></div>			
+		</div>
+		<div class="row">
+			<div class="col-lg-6 ">
+				<mat-form-field class="example-full-width">
+					<input matInput  type="text" [value]="filterText"
+					[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+					<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+					<mat-icon>close</mat-icon>
+					</button>
+				</mat-form-field>
+			</div>
+			<div class="col-lg-3 ">
+				<mat-form-field>
+					<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear($event)" >
+						<mat-option value="2017">2017-2018</mat-option>
+						<mat-option value="2018">2018-2019</mat-option>
+						<mat-option value="2019">2019-2020</mat-option>
+					</mat-select>
+				</mat-form-field>
+			</div>
+			
+		</div>
+		<div class="wrapper">
+			<h5><b>Filtered student count: </b></h5>{{studentdata?.length}}
+			<div class="Rtable Rtable--5cols Rtable--collapse">
+				<div class="Rtable-row Rtable-row--head">
+					<div class="Rtable-cell date-cell column-heading">Full Name</div>
+					<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+					<div class="Rtable-cell date-cell column-heading">Country Birth</div>
+					<div class="Rtable-cell date-cell column-heading">Country Id</div>
+					<div class="Rtable-cell date-cell column-heading">Interested Courses</div>
+					<div class="Rtable-cell date-cell column-heading">Course Applied</div>
+					<div class="Rtable-cell date-cell column-heading">Action</div>
+					<div class="Rtable-cell date-cell column-heading">Profile Completeness</div>
+				</div>
+				
+				<div class="Rtable-row is-striped" *ngFor="let student of studentdata | filter:{name:filterText,email:filterText,courses:filterText,city:filterText,state:filterText,country: filterText,stu_name : filterText,country_name:filterText,interested_courses:filterText} : false | paginate: { itemsPerPage: 10, currentPage: p } ;let i=index; ">
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Full Name</div>
+						<div class="Rtable-cell--content date-content">{{student?.name}}</div>
+					</div>
+					<div class="Rtable-cell topic-cell">
+						<div class="Rtable-cell--content title-content">{{student?.email}}</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Country Birth</div>
+						<div class="Rtable-cell--content date-content">{{student?.country}}</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Country Id</div>
+						<div class="Rtable-cell--content date-content">{{student?.country_id}}</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Interested Courses</div>
+						<div class="Rtable-cell--content date-content">{{student?.interested_courses}}</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Course Applied</div>
+						<div class="Rtable-cell--content date-content">{{student?.courses}}</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Action</div>
+						<div class="Rtable-cell--content date-content">
+							<i class="fa ion-person" status="info" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('studentmgmt',student.id);"></i><br>
+							<i class="fa ion-email" status="info" nbPopover="Raise Ticket" nbPopoverMode="hover" (click)="Ticket(student.email);"></i>	
+						</div>
+					</div>
+					<div class="Rtable-cell date-cell">
+						<div class="Rtable-cell--heading">Profile Completeness</div>
+						<div class="Rtable-cell--content date-content">
+							<nb-progress-bar [value]="student.profile_completeness" outline status="info" [displayValue]="true"></nb-progress-bar>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<pagination-controls (pageChange)="p = $event"></pagination-controls>
+  </nb-card-body>
+</nb-card>
+  

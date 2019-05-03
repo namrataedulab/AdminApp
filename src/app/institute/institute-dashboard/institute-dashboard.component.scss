@@ -1,0 +1,14 @@
+@import '../../@theme/styles/themes';
+@import '~bootstrap/scss/mixins/breakpoints';
+@import '~@nebular/theme/styles/global/breakpoints';
+
+@include nb-install-component() {
+    .solar-card nb-card-header {
+      border: none;
+      padding-bottom: 0;
+    }
+}
+.forAdmission{
+	float:left;
+	padding-top:12px;
+}

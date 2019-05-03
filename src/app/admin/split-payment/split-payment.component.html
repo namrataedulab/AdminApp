@@ -1,0 +1,384 @@
+<nb-card [nbSpinner]="loadingbutton" nbSpinnerStatus="primary">
+	<nb-card-body>
+		<div class="titleWrap">
+			<label>Payment</label>
+		</div>
+		<p-tabView (onChange)="tab($event)">
+            <p-tabPanel header="1st Payment Refund">
+                <h3>1st Payment Refund</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>University Share</th>
+                            <th>Edulab Share</th>
+                            <th>ccAvenue Share</th>
+                            <th>University Refund</th>
+                            <th>Edulab Refund</th>
+                            <th>ccAvenue Refund</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,order_id:filterText,tracking_id:filterText,edu_share:filterText,uni_share:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td>{{application.name}}</td>
+                            <td>{{application.email}}</td>
+                            <td>{{application.order_id}}</td>
+                            <td>{{application.tracking_id}}</td>
+                            <td>{{application.uni_share}}</td>
+                            <td>{{application.edu_share}}</td>
+                            <td>{{application.cc_share}}</td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="University Refund" id='uni_refund1{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="uni_refund1error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="Edulab Refund" id='edu_refund1{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="edu_refund1error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="ccAvenue Refund" id='cc_refund1{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="cc_refund1error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <i class="fa ion-checkmark" nbPopover="Proceed" nbPopoverMode="hover" (click)="proceedRefund('1',application.order_id,application.edu_share,application.uni_share,application.cc_share,application.tracking_id);"></i>
+                                <div *ngIf='application.exists == "1"'>
+                                    <h6 style="color: red">
+                                        Refund is already Processed for this transaction !!!
+                                    </h6>
+                                </div>
+                            </td> 
+                        </tr>
+                    </tbody>				
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+            </p-tabPanel>
+			<p-tabPanel header="2nd Payment Split">
+                <h3>2nd Payment Split</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>Total Amount</th>
+                            <th>ccAvenue Share</th>
+                            <th>Available Amount</th>
+                            <th>University Share</th>
+                            <th>Edulab Share</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,amount:filterText,order_id:filterText,tracking_id:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td >{{application.name}}</td>
+                            <td >{{application.email}}</td>
+                            <td >{{application.order_id}}</td>
+                            <td >{{application.tracking_id}}</td>
+                            <td >{{application.amount}}</td>
+                            <td >{{application.ccavenue_share}}</td>
+                            <td >{{application.available_amount}}</td>
+                            <td >
+                                <mat-form-field>
+                                    <input matInput placeholder="University Share" id='uni_share{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="uni_shareerror{{application.order_id}}"></span>
+                            </td>
+                            <td >
+                                <mat-form-field>
+                                    <input matInput placeholder="Edulab Share" id='edu_share{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="edu_shareerror{{application.order_id}}"></span>
+                            </td>
+                            <td >
+                                <i class="fa ion-checkmark" id='proceedbutton{{application.order_id}}' nbPopover="Proceed" nbPopoverMode="hover" (click)="proceed2ndSplit(application.order_id,application.available_amount,application.ccavenue_share,application.tracking_id);"></i>
+                            </td>
+                        </tr>
+                    </tbody>				
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+            </p-tabPanel>
+            <p-tabPanel header="2nd Payment Refund">
+                <h3>2nd Payment Refund</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>University Share</th>
+                            <th>Edulab Share</th>
+                            <th>ccAvenue Share</th>
+                            <th>University Refund</th>
+                            <th>Edulab Refund</th>
+                            <th>ccAvenue Refund</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,order_id:filterText,tracking_id:filterText,edu_share:filterText,uni_share:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td>{{application.name}}</td>
+                            <td>{{application.email}}</td>
+                            <td>{{application.order_id}}</td>
+                            <td>{{application.tracking_id}}</td>
+                            <td>{{application.uni_share}}</td>
+                            <td>{{application.edu_share}}</td>
+                            <td>{{application.cc_share}}</td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="University Refund" id='uni_refund2{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="uni_refund2error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="Edulab Refund" id='edu_refund2{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="edu_refund2error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="ccAvenue Refund" id='cc_refund2{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="cc_refund2error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <i class="fa ion-checkmark" nbPopover="Proceed" nbPopoverMode="hover" (click)="proceedRefund('2',application.order_id,application.edu_share,application.uni_share,application.cc_share,application.tracking_id);"></i>
+                                <div *ngIf='application.exists == "1"'>
+                                    <h6 style="color: red">
+                                        Refund is already Processed for this transaction !!!
+                                    </h6>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>				
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+            </p-tabPanel>
+            <p-tabPanel header="3rd Payment Split">
+                <h3>3rd Payment Split</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>Total Amount</th>
+                            <th>ccAvenue Share</th>
+                            <th>College Amount</th>
+                            <th>College Share</th>
+                            <th>Edulab Amount</th>
+                            <th>Edulab Share</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,amount:filterText,order_id:filterText,tracking_id:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td >{{application.name}}</td>
+                            <td >{{application.email}}</td>
+                            <td >{{application.order_id}}</td>
+                            <td >{{application.tracking_id}}</td>
+                            <td >{{application.amount}}</td>
+                            <td >{{application.ccavenue_share}}</td>
+                            <td >{{application.available_amount_college}}</td>
+                            <td >
+                                <mat-form-field>
+                                    <input matInput placeholder="College Share" id='col_share{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="col_shareerror{{application.order_id}}"></span>
+                            </td>
+                            <td >{{application.available_amount_edulab}}</td>
+                            <td >
+                                <mat-form-field>
+                                    <input matInput placeholder="Edulab Share" id='edulab_share{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="edulab_shareerror{{application.order_id}}"></span>
+                            </td>
+                            <td >
+                                <i class="fa ion-checkmark" id='proceedbutton{{application.order_id}}' nbPopover="Proceed" nbPopoverMode="hover" (click)="proceed3rdSplit(application.order_id,application.available_amount,application.available_amount_college,application.available_amount_edulab,application.ccavenue_share,application.tracking_id,application.application_id);"></i>
+                            </td>
+                        </tr>
+                    </tbody>				
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+            </p-tabPanel>
+            <p-tabPanel header="3rd Payment Refund">
+                <h3>3rd Payment Refund</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>College Share</th>
+                            <th>Edulab Share</th>
+                            <th>ccAvenue Share</th>
+                            <th>College Refund</th>
+                            <th>Edulab Refund</th>
+                            <th>ccAvenue Refund</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,order_id:filterText,tracking_id:filterText,edu_share:filterText,col_share:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td>{{application.name}}</td>
+                            <td>{{application.email}}</td>
+                            <td>{{application.order_id}}</td>
+                            <td>{{application.tracking_id}}</td>
+                            <td>{{application.col_share}}</td>
+                            <td>{{application.edu_share}}</td>
+                            <td>{{application.cc_share}}</td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="College Refund" id='col_refund3{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="uni_refund3error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="Edulab Refund" id='edu_refund3{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="edu_refund3error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <mat-form-field>
+                                    <input matInput placeholder="ccAvenue Refund" id='cc_refund3{{application.order_id}}'>
+                                </mat-form-field><br>
+                                <span id="cc_refund3error{{application.order_id}}"></span>
+                            </td>
+                            <td>
+                                <i class="fa ion-checkmark" nbPopover="Proceed" nbPopoverMode="hover" (click)="proceed3rdRefund('3',application.application_id,application.order_id,application.edu_share,application.col_share,application.cc_share,application.tracking_id);"></i>
+                                <div *ngIf='application.exists == "1"'>
+                                    <h6 style="color: red">
+                                        Refund is already Processed for this transaction !!!
+                                    </h6>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>				
+                </table>
+                <pagination-controls (pageChange)="p = $event"></pagination-controls>
+            </p-tabPanel>
+            <p-tabPanel header="Successfull Refunds">
+                <h3>Successfull Refunds</h3>
+                <p-messages [(value)]="msgs"></p-messages>
+                <div class="row">
+                    <div class="col-md-12 ">
+                        <mat-form-field class="example-full-width">
+                            <input matInput  type="text" [value]="filterText"
+                            [placeholder]="filterPlaceholder" [formControl]="filterInput" />
+                            <button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <table class="table table-striped w-auto">
+                    <thead style="font-size: 13px">
+                        <h5><b>Total Count:</b></h5>{{Total_data?.length}}
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Order Id</th>
+                            <th>Reference No</th>
+                            <th>Edulab Refund</th>
+                            <th>ccAvenue Refund</th>
+                            <th>College Refund</th>
+                            <th>University Refund</th>
+                        </tr>
+                    </thead>
+                    <tbody style="font-size: 12px">
+                        <tr class="info" *ngFor="let application of Total_data | filter:{name:filterText,email:filterText,order_id:filterText,tracking_id:filterText,edu_refund:filterText,col_refund:filterText,cc_refund:filterText,uni_refund:filterText} | paginate: { itemsPerPage: 10, currentPage: p }  ">
+                            <td>{{application.name}}</td>
+                            <td>{{application.email}}</td>
+                            <td>{{application.order_id}}</td>
+                            <td>{{application.tracking_id}}</td>
+                            <td>{{application.edu_refund}}</td>
+                            <td>{{application.cc_refund}}</td>
+                            <td>{{application.col_refund}}</td>
+                            <td>{{application.uni_refund}}</td>
+                        </tr>
+                    </tbody>				
+                </table>
+            </p-tabPanel>
+        </p-tabView>
+    </nb-card-body>
+</nb-card>

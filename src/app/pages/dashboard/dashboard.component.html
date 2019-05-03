@@ -1,0 +1,110 @@
+<div *ngIf="user?.role == 'student'">
+
+<nb-card status="success" *ngIf = "cartCheck == true || ucaFlag == true">
+  <nb-card-header>Track Your Application Progress</nb-card-header>
+  <nb-card-body>
+    <div lass="col-md-12" *ngIf="length > 1 && status">
+      <mat-form-field class="col-xl-6"> 
+        <mat-select placeholder="Select Specialization" [(ngModel)]="spec" name="spec" (ngModelChange)="setStepper($event)"  >
+          <mat-option *ngFor="let spec of applicationData" [value]="spec.id" (click)="setCourse_id(spec.course_id)">
+            {{spec.courseSpec}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div lass="col-md-12" style="margin-top:50px;">
+      <nb-stepper   #stepper (click)="selectStep()" >
+        <nb-step   [label]="labelOne" >
+          <ng-template #labelOne >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              Pay Eligibility Fees</ng-template>
+          <!-- <h3  >Apply & pay Eligibility fees</h3>  -->
+        </nb-step>
+        <nb-step [label]="labelTwo"  >
+          <ng-template #labelTwo>Eligibility Section</ng-template>
+          <!-- <h3>Eligibility Section</h3> -->
+        </nb-step>
+        <nb-step [label]="labelThree"  >  
+          <ng-template #labelThree>Download Provisional Letter</ng-template>
+          <!-- <h3>Download Provisional Letter</h3> -->
+        </nb-step>
+        <nb-step [label]="labelFour" >
+          <ng-template #labelFour>Pay One Time Registration Fee</ng-template>
+          <!-- <h3>Pay one time registration fee</h3> -->
+        </nb-step>
+        <nb-step [label]="labelFive">
+          <ng-template #labelFive>College Allotment</ng-template>
+          <!-- <h3>College Allotment</h3> -->
+        </nb-step>
+        <nb-step [label]="labelSix"  >
+          <ng-template #labelSix>Pay College Fees
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</ng-template>
+          <!-- <h3>Pay college fees</h3>  -->
+        </nb-step>
+      </nb-stepper>
+    </div>
+    <div lass="col-md-12">
+      <nb-alert status="danger" closable (close)="onClose()" *ngIf="alertFlag == 1">
+        {{message}}
+      </nb-alert>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+<div class="row">
+<div class="col-xxxl-8 col-xxl-8 col-lg-7 col-md-8">
+<nb-card status="success">
+<nb-card-header><h4>Hi {{user.name}},</h4></nb-card-header>
+<nb-card-body>
+    <h2>Welcome to the University of Mumbai!</h2> <br />This is the Dashboard for <a target="_blank" href="https://mu.admissiondesk.org/pdfs/CATEGORY.pdf">International Student's</a> to apply to various courses and colleges using a single Application Form. The Menu on your left will assist you to seamlessly use this single window Application Process
+    <br /><br />
+    <b>Let's get started!</b>
+    <br />
+    <br />
+    <ul>
+      <b>Here's the process in brief:</b>
+      <ol>
+        <li>Complete Your Profile</li>
+        <li>Search for course and college detail's</li>
+        <li>Pay Eligibility Fee And download Provisional Eligibility Letter</li>
+        <li>Track Your progress under MyApplication's</li>
+        <li>Pay Application processing fee only after which you will be called to physically verify your original document's at the University of Mumbai</li>
+      </ol>
+    </ul>
+</nb-card-body>
+<nb-card-footer><h4>Now that you're creating your Profile with University of Mumbai, share these exciting news with your friends and family!
+  In case of any queries , please look up FAQ's or send us a ticket from help section!</h4></nb-card-footer>
+
+</nb-card>
+</div>
+<div class="col-xxxl-4 col-xxl-4 col-lg-5 col-md-4">
+<div class="row">
+      <div class="col-xxxl-12 col-xxl-12 col-lg-12 col-md-12">
+    <ngx-solar ></ngx-solar>            
+</div>  
+</div>
+
+<div class="row">
+<div class="col-md-12">
+  <nb-card status="success" size="xsmall">
+    <nb-card-header><h5>View Profile Tutorial</h5></nb-card-header>
+    <nb-card-body>
+      <li><a title="University of Mumbai"  href="https://youtu.be/GOVIlayPKC4" target="blank" data-rel="prettyPhoto"><u>Personal</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/r_yKUsZugOc" target="blank" data-rel="prettyPhoto"><u>Guardian</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/9XJ540H7STo" target="blank" data-rel="prettyPhoto"><u>Education</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/f29Q5p8GO_8" target="blank" data-rel="prettyPhoto"><u>Education(CBSE)</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/PwUDmLhSy3s" target="blank" data-rel="prettyPhoto"><u>Education(HSC)</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/-99YJZZBQlo" target="blank" data-rel="prettyPhoto"><u>Employment</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/2lKn_HeEiDA" target="blank" data-rel="prettyPhoto"><u>Transcript</u></a></li>
+      <li><a title="University of Mumbai"  href="https://youtu.be/dJcC-5dyMIM" target="blank" data-rel="prettyPhoto"><u>How to Apply?</u></a></li>
+    </nb-card-body>      
+  </nb-card>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+

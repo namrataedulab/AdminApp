@@ -1,0 +1,468 @@
+<nb-card>
+	<nb-card-body>
+		<div class="titleWrap">
+			<label>Application</label>
+		</div>
+		<p-tabView (onChange)="getApplicationAccepted($event)">
+			<p-tabPanel header="1st Payment Students">
+				<h3>Applications Requested</h3>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('new',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper" [nbSpinner]="loading" nbSpinnerStatus="danger" nbSpinnerSize="xlarge">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">User Id</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell topic-cell column-heading">Email</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Check Eligibility</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{date:filterText,email:filterText,course:filterText,specialization:filterText,student_category:filterText,enrollment_no: filterText,stu_name : filterText,country_name:filterText,user_id:filterText} : false | paginate: { itemsPerPage: 10, currentPage: p1 , id:'1' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{application?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">User Id</div>
+								<div class="Rtable-cell--content date-content">{{application?.user_id}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{application?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Check Eligibility</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton  size="xsmall" outline status="info" (click)="Check_Eligibility(application.user_id,application.college_university,application.college_name,application.Subject_first_hsc,application.Subject_Second_hsc,application.Subject_Third_hsc,application.Subject_fourth_hsc,application.Subject_fifth_hsc,application.Subject_Six_hsc,application.specialization,application.course)">
+										Check Eligibility
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('application',application.user_id,application.course_id,'new',application.id);"></i>
+									<section class="example-section">
+										<mat-slide-toggle
+											class="example-margin"
+											[color]="color"
+											(change)="sendToEligibility($event,application.id,application.course_id,application.user_id,application.check_eligibility)"
+											[checked]="application.check_eligibility"
+											[disabled]="disabled">
+											Send to Eligibility
+										</mat-slide-toggle>
+									</section>
+									<i class="fa ion-email" status="info" nbPopover="Raise Ticket" nbPopoverMode="hover" (click)="Ticket(application.email);"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			<pagination-controls (pageChange)="p1 = $event" id='1'></pagination-controls>			
+			</p-tabPanel>
+			<p-tabPanel header="Unticked">
+				<h3>Unticked</h3>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('unticked',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{unticked_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">User Id</div>
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Email</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Intake</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let data of unticked_data  | filter:{enrollment_no: filterText,stu_name : filterText,country_name:filterText,user_id:filterText} : false | paginate: { itemsPerPage: 10, currentPage: p2 , id:'2' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{data?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{data?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">User Id</div>
+								<div class="Rtable-cell--content date-content">{{data?.user_id}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{data?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{data?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{data?.specialization}} <br> ({{data?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Intake</div>
+								<div class="Rtable-cell--content date-content">{{data.intake_date + '/' + data.intake_month + '/' + data.intake_year + ' To ' + data.intake_to_date + '/' + data.intake_to_month + '/' + data.intake_to_year}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('application',data.user_id,data.course_id,'new',data.id);"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p2 = $event" id="2"></pagination-controls>			
+			</p-tabPanel>
+			<p-tabPanel header="ICCR Application">
+				<h3>ICCR Applications</h3>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterICCRYear('iccr',$event,'new')" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{iccr_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Reference No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Passport No.</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let iccr of iccr_data | filter:{date:filterText,enrollment_no :filterText, iccr_ref_no:filterText,country_name:filterText,stu_name:filterText,specialization:filterText,course:filterText,passport_no:filterText }| paginate: { itemsPerPage: 10, currentPage: p3, id:'3' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Reference No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.iccr_ref_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{iccr?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.specialization}} <br> ({{iccr?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Passport No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.passport_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="info" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('iccr',iccr.user_id,iccr.course_id,'new',iccr.id);"></i>
+									<section class="example-section">
+										<mat-slide-toggle
+											class="example-margin"
+											[color]="color"
+											(change)="sendToEligibilityICCR($event,iccr.id,iccr.course_id,iccr.user_id,iccr.check_eligibility)"
+											[checked]="iccr.check_eligibility"
+											[disabled]="disabled">
+											Send to Eligibility
+										</mat-slide-toggle>
+									</section>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p3 = $event" id='3'></pagination-controls>			
+			</p-tabPanel>
+			<p-tabPanel header="ICCR Applications Accepted">
+				<h3>ICCR Applications Accepted</h3>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterICCRYear('iccr_accept',$event,'accept')" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{iccr_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Reference No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell date-cell column-heading">ICCR Eligibility Letter</div>
+							<div class="Rtable-cell date-cell column-heading">ICCR Application Letter</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let iccr of iccr_data | filter:{date:filterText,enrollment_no :filterText, iccr_ref_no:filterText,country_name:filterText,stu_name:filterText,specialization:filterText,course:filterText } | paginate: { itemsPerPage: 10, currentPage: p4 , id:'4' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Reference No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.iccr_ref_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{iccr?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.specialization}} <br> ({{iccr?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline status="info" size="xsmall"  (click)="viewMore('iccr',iccr.user_id,iccr.course_id,'new',iccr.id);" shape="semi-round">
+										View
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">ICCR Eligibility Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline size="xsmall" status="info">
+											<!-- (click)="DownloadICCREligibilityLetter(iccr.user_id,iccr.id)" -->
+										<a href="{{oldserverUrl}}/upload/transcript_iccr_student/{{iccr?.user_id}}/{{iccr?.id}}_Confirmation_provisional_Letter.pdf">
+											Download
+										</a>
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">ICCR Application Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline size="xsmall"  status="info">
+										Download
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p4 = $event" id='4'></pagination-controls>			
+			</p-tabPanel>
+			<p-tabPanel header="ICCR Applications Rejected">
+				<h3>ICCR Applications Rejected</h3>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterICCRYear('iccr_reject',$event,'reject')" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{iccr_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Reference No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell date-cell column-heading">ICCR Non Eligibility Letter</div>
+							<div class="Rtable-cell date-cell column-heading">ICCR Application Letter</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let iccr of iccr_data | filter:{date:filterText,enrollment_no :filterText, iccr_ref_no:filterText,country_name:filterText,stu_name:filterText,specialization:filterText,course:filterText } | paginate: { itemsPerPage: 10, currentPage: p4 , id:'4' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Reference No.</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.iccr_ref_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{iccr?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{iccr?.specialization}} <br> ({{iccr?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline status="info" size="xsmall"  (click)="viewMore('iccr',iccr.user_id,iccr.course_id,'new',iccr.id);" shape="semi-round">
+										View
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">ICCR Eligibility Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline size="xsmall"  status="info">
+										Download
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">ICCR Application Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton outline size="xsmall"  status="info">
+										Download
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="info " *ngIf="iccr_data?.length === 0">
+							<div class="noRecords">No records found !</div>						
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p5 = $event" id='5'></pagination-controls>			
+			</p-tabPanel>
+		</p-tabView>    
+	</nb-card-body>
+</nb-card>
+	

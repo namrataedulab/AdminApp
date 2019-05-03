@@ -1,0 +1,374 @@
+<nb-card>
+	<nb-card-body>
+		<p-tabView (onChange)="getApplicationAcceptedForeignOffice($event)">
+			<p-tabPanel [selected]="tab1"  header="Seat Allotment">
+				<b><h3>Seat Allotment </h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('seat_allocation',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Applied Course</div>
+							<div class="Rtable-cell date-cell column-heading">Eligibility Letter</div>
+							<div class="Rtable-cell date-cell column-heading">Reference Number Of Provisional Letter</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Email to</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell date-cell column-heading">College allocation</div>
+							<div class="Rtable-cell date-cell column-heading">Firm Letter</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText,enrollment_no: filterText,student_category: filterText , email: filterText, specialization: filterText, course: filterText} | paginate: { itemsPerPage: 10, currentPage: p1, id:'1' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{application?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Applied Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Eligibility Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton size="xsmall" status="info">
+										<!-- (click)="downloadletter( application?.user_id ,'Provisional_Letter',application?.id)" -->
+										<a href="{{serverUrl}}/upload/transcript/{{application?.user_id}}/{{application?.id}}_Confirmation_provisional_Letter.pdf">
+											Download
+										</a>
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Reference Number Of Provisional Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<input style="width: 100px;"  readonly="" value="{{application?.ref_no}}" size="xsmall" hero status="info" placeholder="Reference number"/>
+								</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Email To</div>
+								<div class="Rtable-cell--content date-content">
+									<input type="checkbox" (click)="sendEmailTostudent($event, application?.user_id,application?.course_id,application?.id,application?.specialization)" id="student_email{{application?.id}}" value="Student email" /> Student <br>
+									<input type="checkbox" id="guardin_email{{application?.id}}" value="Guardian email" (click)="sendEmailToGuardian($event, application?.user_id,application?.course_id,application?.id,application?.specialization)" /> Guardian <br>
+									<input type="checkbox" name="Tick" id="embassy_email{{application?.id}}" value="Embassy email" (click)="sendEmailToEmbassy( application?.user_id, application?.course_id, application?.id, application?.specialization)" /> Embassy<br>
+									<mat-select placeholder="Select Country" name='country' id="country{{application?.id}}" class="form-control" ngModel="{{country}}" (ngModelChange)="changeemail($event,application?.id,embassyEmailValue.value);" style="padding-top: 5px;padding-bottom: 5px;padding-left: 5px;display : none" required #countryValue>
+										<mat-option value="" disabled>Country</mat-option>
+										<mat-option value="{{country.name}}" *ngFor="let country of Countries">{{ country.name }}</mat-option>
+									</mat-select>
+									<mat-select placeholder="Select Embassy Emails"  name='embassyEmail' id="embassyEmail{{application?.id}}" class="form-control"  ngModel="{{embassy}}"  (ngModelChange)="getEmail($event,application?.id);" style="padding-top: 5px;padding-left: 5px;padding-bottom: 5px;display : none" required #embassyEmailValue>
+										<mat-option value="" disabled>Email</mat-option>
+										<mat-option value="{{embassylist}}" *ngFor="let embassylist of embassyEmailList">{{ embassylist }}</mat-option>		
+									</mat-select>
+									<input type="text" name="input_email" id="input_email{{application?.id}}" style="display : none;" #input_email/>
+									<span id="emailerror{{application?.id}}" style="color:red;"></span>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="sendEmailembassy(application?.id, application?.user_id, application?.course_id,embassyEmailValue.value,countryValue.value,input_email.value)" id="sendEmail{{application?.id}}" style=" display : none;">Send email</button>
+									<button nbButton size="xsmall" status="info" (click)="sendEmailembassy1(application?.id, application?.user_id, application?.course_id,embassyEmailValue.value,countryValue.value,input_email.value)" id="sendEmail1{{application?.id}}" style=" display : none;">Send email</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton  size="xsmall" status="info" (click)="open(application?.user_id,application?.id,application?.course_id,application?.specialization)"  id="sendto{{application.id}}" *ngIf="application.collegename =='-'">  Student Preferences</button>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="deallocateCollege(application?.id,application?.user_id,application?.collegename)" id="deallocate{{application?.id}}" *ngIf="application?.collegename != '-'">Deallocate College</button>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="viewHSCDetails(application?.user_id,application?.qualification,application?.percentage,application?.Subject_first,application?.mark_first,application?.OutOf_first,application?.grade_first,application?.Subject_Second,application?.mark_Second,application?.OutOf_Second,application?.grade_Second,application?.Subject_Third,application?.mark_Third,application?.OutOf_Third,application?.grade_Third,application?.Subject_fourth,application?.mark_fourth,application?.OutOf_fourth,application?.grade_fourth,application?.Subject_fifth,application?.mark_fifth,application?.OutOf_fifth,application?.grade_fifth,application?.Subject_Six,application?.mark_Six,application?.OutOf_Six,application?.grade_Six,application?.college_university)"  id="hsc_details_view{{application?.id}}">HSC Details</button>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="getPaymentDetails(application?.id,application?.course_id,application?.split)"  id="sendEmail{{application?.id}}">Payment Details</button>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="downloadSeatAllocationDraft( application?.user_id ,application?.enrollment_no ,application?.id)" *ngIf="application?.collegename != '-'" id="sendEmail{{application?.id}}">
+										<a id="seatAllo{{application?.id}}">
+											Seat Allocation Draft
+										</a>
+									</button>
+									<br>
+									<button nbButton size="xsmall" status="info" (click)=" DownloadCertificate(application?.id,application?.course_id,application?.user_id)">
+										<a id="certi{{application?.id}}">
+											Download Certificate
+										</a>
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">College allocation</div>
+								<div class="Rtable-cell--content date-content" id="sendto{{application.id}}" *ngIf="application.collegename =='-'">
+									:Pending
+								</div>
+								<div class="Rtable-cell--content date-content" id="sendto{{application.id}}" *ngIf="application?.collegename != '-'">
+									{{ application?.collegename }}
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Firm Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton size="xsmall" status="info" (click)="downloadFirmLetter(application?.user_id,application?.specialization, application?.id)" id="firmletterdownload{{application?.id}}">
+										<a id="firmlet{{application?.id}}">Download</a>
+									</button>
+									<input size="xsmall" status="info" placeholder="Enter College Fees" type="text" name="input_college_fees" id="input_college_fees{{application?.id}}" style="display : none;" #input_college_fees/>
+									<input  type="hidden" id="course_fees_id{{application?.id}}">
+									<button nbButton size="xsmall" status="info" (click)="downloadFirmLetterUpdateCollegeFees(application?.user_id,application?.specialization, application?.id,input_college_fees.value, application?.course_id)" id="generateFirmFeesUpdate{{application?.id}}"  style="display : none;">Generate</button>
+									<br>
+									<span style="color:red;" id="coursefeeserror{{application?.id}}"></span>
+									<br>
+									<span *ngIf="application?.firmletterexist == false && application?.second_payment != false" style="color: red;font-size: 12px;">Firm Letter is not Generated</span>
+									<span *ngIf="application?.firmletterexist == true" style="color: green;font-size: 12px;">Firm Letter is Generated</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls style="align-content: center" (pageChange)="p1 = $event" id='1'></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel [selected]="tab2"  header="Documents Verification">
+				<b><h3>Documents Verification</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+					  <mat-form-field>
+						  <mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('document_verification',$event)" >
+							  <mat-option value="2017">2017-2018</mat-option>
+							  <mat-option value="2018">2018-2019</mat-option>
+							  <mat-option value="2019">2019-2020</mat-option>
+						  </mat-select>
+					  </mat-form-field>
+				  </div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Documents Verification</div>
+							<div class="Rtable-cell date-cell column-heading">Allotted College</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText , email: filterText, specialization: filterText, course: filterText, collegename: filterText } | paginate: { itemsPerPage: 10, currentPage: p, id:'2' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Documents Verification</div>
+								<div class="Rtable-cell--content date-content">
+									<mat-slide-toggle
+										class="example-margin"
+										[color]="color"
+										(change)="checkverification($event,application?.id,application?.user_id)"
+										[checked]="application?.document_verified == 'true'"
+										[disabled]="disabled">
+										Document Verified
+									</mat-slide-toggle>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Allotted College</div>
+								<div class="Rtable-cell--content date-content">{{application?.collegename}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls style="align-content: center" (pageChange)="p2 = $event" id='2'></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel [selected]="tab3"  header="Third Payment">
+				<b><h3>Third Payment</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year" [(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('third_payment',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+				  </div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Payment Details</div>
+							<div class="Rtable-cell date-cell column-heading">Allotted College</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText , email: filterText, specialization: filterText, course: filterText, collegename: filterText } | paginate: { itemsPerPage: 10, currentPage: p3, id:'3' }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Payment Details</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton size="xsmall" status="info" (click)="getThirdPaymentDetails(application?.id, application?.t_paymentMode, application?.total_amount, application?.currency, application?.orderId, application?.dateOfPayment, application?.challanThirdExist, application?.third_payment_challan)"  id="viewPaymentDetail{{application?.id}}">
+										View
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Allotted College</div>
+								<div class="Rtable-cell--content date-content">{{application?.collegename}}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls style="align-content: center" (pageChange)="p3 = $event" id='3'></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel [selected]="tab4" header="ICCR Student's Seat Allotment">
+				<b><h3>ICCR Student's Seat Allotment </h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear('iccr_seat_allocation',$event)" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Letter from Eligibility department</div>
+							<div class="Rtable-cell date-cell column-heading">Reference Number oF provisional letter</div>
+							<div class="Rtable-cell date-cell column-heading">Country</div>
+							<div class="Rtable-cell topic-cell column-heading">Email</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell date-cell column-heading">College allocation</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText,enrollment_no: filterText , email: filterText, specialization: filterText, course: filterText, country_name: filterText } | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Letter from Eligibility department</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton (click)="iccr_provisional_letter_downloadletter( application?.user_id ,application?.id, application?.course_id )"  size="xsmall" hero status="info">
+										<a id='iccrprov{{application?.id}}'>
+											Download
+										</a>
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Reference Number oF provisional letter</div>
+								<div class="Rtable-cell--content date-content">
+									<input type="text"  nbButton  size="xsmall" status="info" style="width: 80%" value="{{ application?.iccr_eligibility_num }}" placeholder="Eligibility Number"/>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country</div>
+								<div class="Rtable-cell--content date-content">{{ application?.country_name }}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{ application?.email }}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton (click)="iccr_open_model(application?.user_id,application?.id,application?.course_id,application?.specialization)" *ngIf="application.collegename =='-'"  size="xsmall" hero status="info">Student Preferences</button> 
+									<br>
+									<button nbButton size="xsmall" status="info" (click)="iccr_deallocate_College(application?.id,application?.user_id,application?.collegename)" id="deallocate{{application?.id}}" *ngIf="application?.collegename != '-'">Deallocate College</button>
+									<br>
+									<button nbButton (click)="ICCR_Download_Firm_Letter(application?.id,application?.user_id)" size="xsmall" hero status="info">
+										<a id="iccrFirm{{application?.id}}">
+											Download
+										</a>
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">College allocation</div>
+								<div class="Rtable-cell--content date-content" *ngIf="application?.collegename == '' || application?.collegename == null"> : Pending </div>
+								<div class="Rtable-cell--content date-content" *ngIf="application?.collegename != '' || application?.collegename != null"> {{ application?.collegename }} </div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls style="align-content: center" (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+		</p-tabView>    
+   </nb-card-body>
+   <p-dialog [autoZIndex]="true" [(visible)]="display" [modal]="true" [responsive]="true" [style]="{width: '350px', minWidth: '200px'}">
+	  <span><h5>{{ dialog_Message }}</h5></span>
+  </p-dialog>
+   <p-confirmDialog [style]="{width: '425px'}"></p-confirmDialog> 
+</nb-card>

@@ -1,0 +1,606 @@
+<nb-card>
+	<nb-card-body>
+		<div class="titleWrap">
+			<label>Eligibility</label>
+		</div>
+		<p-tabView (onChange)="getApplication($event)">
+			<p-tabPanel header="Eligibility">
+				<b><h3>Eligibility</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYear($event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				
+				<div class="wrapper" [nbSpinner]="loading" nbSpinnerStatus="danger" nbSpinnerSize="xlarge">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Application Id</div>
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell pdf-cell column-heading">Forword Letter</div>
+							<div class="Rtable-cell pdf-cell column-heading">Application Letter</div>
+							<div class="Rtable-cell date-cell column-heading">Eligblity Number</div>
+							<div class="Rtable-cell date-cell column-heading">Remark</div>
+							<div class="Rtable-cell date-cell column-heading">Actions</div>
+							<div class="Rtable-cell date-cell column-heading">Raise Ticket</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText, email: filterText, specialization: filterText, course: filterText} | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application Id</div>
+								<div class="Rtable-cell--content date-content">{{application?.id}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Forword Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<a href="{{serverUrl}}/upload/Forward_Letter/{{application?.user_id}}/{{application?.id}}_Forward_Letter.pdf">
+											<!-- (click)=downloadForewordLetter(application.pdf,application.file_name) -->
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;">
+									</a>
+								</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Application Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<a id="prevLet{{application?.id}}">
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;" (click)="DownloadApplicationLetter(application.user_id,application.course_id,application.id)">
+									</a>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Eligblity Number</div>
+								<div class="Rtable-cell--content date-content">
+									<mat-form-field class="example-full-width">
+										<input matInput placeholder="Eligbility Number" id='eligib_number{{application.id}}'>
+									</mat-form-field><br>
+									<span id="elignumbererror{{application.id}}"></span>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Remark</div>
+								<div class="Rtable-cell--content date-content">
+									<textarea id='eligib_remark{{application.id}}' [rows]="2" [cols]="15" pInputTextarea autoResize="autoResize"></textarea>
+									<span id="eligremarkerror{{application.id}}"></span>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" id='view_eligibility{{application.id}}' status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('eligibility',application.user_id,application.course_id,'new',application.id);"></i>
+									<i class="fa ion-android-lock" id='documentverify{{application.id}}' nbPopover="Errata" nbPopoverMode="hover" (click)="errata(application.user_id,'self_financed');"></i>
+									<i class="fa ion-checkmark" id='acceptbutton{{application.id}}' nbPopover="Accept" nbPopoverMode="hover" (click)="acceptApplication(application.user_id,application.course_id,application.id);"></i>
+									<i class="fa ion-close-round" id='rejectbutton{{application.id}}' nbPopover = "Reject"  nbPopoverMode="hover" (click)="rejectApplication(application.user_id,application.course_id,application.id);"></i>
+									<div *ngIf="application.requestToReupload ==true">
+										<div>
+											<span style="color: red;">You have requested {{application.stu_name}} to re-upload transcript !</span>
+										</div>	
+									</div>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Raise Ticket</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-email" status="info" nbPopover="Raise Ticket" nbPopoverMode="hover" (click)="Ticket(application.email);"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel header="Eligibility Accepted">
+				<h3>Eligibility Accepted</h3>
+				<div class="row">
+					<div class="col-lg-3 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterApplication('accept',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Passport No</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell pdf-cell column-heading">Provisional Eligibility Form</div>
+							<div class="Rtable-cell pdf-cell column-heading">Application Form</div>
+							<div class="Rtable-cell pdf-cell column-heading">Application Form with Preferences</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data| filter:{country_name:filterText,course:filterText,specialization:filterText,passport_no:filterText,student_category:filterText,date:filterText,enrollment_no:filterText,payment_mode:filterText,stu_name: filterText} | paginate: { itemsPerPage: 10, currentPage: p } ">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{application?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{application?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Passport No</div>
+								<div class="Rtable-cell--content date-content">{{application.passport_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('application',application.user_id,application.course_id,'accept',application.id);"></i>
+								</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Provisional Eligibility Form</div>
+								<div class="Rtable-cell--content date-content">
+									<!-- <img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;" (click)="showprovisionalLetterApp(application.user_id,application.course_id,application.id)"> -->
+									<a href="{{serverUrl}}/upload/transcript/{{application?.user_id}}/{{application?.id}}_Confirmation_provisional_Letter.pdf">
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;">
+									</a>
+								</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Application Form</div>
+								<div class="Rtable-cell--content date-content">
+									<a id='prevLetter{{application?.id}}'>
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;" (click)="preview(application.user_id,application.course_id,application.id)">
+									</a>									
+								</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Application Form with Preferences</div>
+								<div class="Rtable-cell--content date-content">
+									<a id='prevLetPref{{application?.id}}'>
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;" (click)="preview_data_with_Preferences(application.user_id,application.course_id,application.id)">
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+	        <p-tabPanel header="Eligibility Rejected">
+				<h3>Eligibility Rejected</h3>
+				<div class="row">
+					<div class="col-lg-3 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+							<button mat-button *ngIf="filterText" matSuffix mat-icon-button aria-label="Clear" (click)="filterText=''">
+								<mat-icon>close</mat-icon>
+							</button>
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterApplication('reject',$event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Category</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Passport No</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell pdf-cell column-heading">Application Form</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{application?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Category</div>
+								<div class="Rtable-cell--content date-content">{{application?.student_category}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Passport No</div>
+								<div class="Rtable-cell--content date-content">{{application.passport_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton status="info" size="xsmall"  outline shape="semi-round" (click)="viewMore('application',application.user_id,application.course_id,'reject',application.id);">
+										View
+									</button>
+								</div>
+							</div>
+							<div class="Rtable-cell pdf-cell">
+								<div class="Rtable-cell--heading">Application Form</div>
+								<div class="Rtable-cell--content date-content">
+									<button nbButton size="xsmall" outline  status="info" (click)="preview(application.user_id,application.course_id,application.id)">
+										Download
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel header="Re-Uploaded Transcripts">
+				<b><h3>Re-Uploaded Transcripts of Student's</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYearReUpload($event)" >
+								<mat-option value="2017">2017-2018</mat-option>
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper" [nbSpinner]="loading" nbSpinnerStatus="danger" nbSpinnerSize="xlarge">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Mobile Country Code</div>
+							<div class="Rtable-cell date-cell column-heading">Mobile</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{name: filterText, email: filterText, mobile_country_code: filterText,mobile: filterText} | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Mobile Country Code</div>
+								<div class="Rtable-cell--content date-content">{{application?.mobile_country_code}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Mobile</div>
+								<div class="Rtable-cell--content date-content">{{application?.mobile}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="view_reupload_transcript(application?.user_id,'self_financed');"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>	
+			<p-tabPanel header="Applications of ICCR">
+				<b><h3>Eligibility</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYearICCR('iccr',$event)" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper" [nbSpinner]="loading" nbSpinnerStatus="danger" nbSpinnerSize="xlarge">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Date</div>
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Country Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Eligblity Number</div>
+							<div class="Rtable-cell date-cell column-heading">Remark</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+							<div class="Rtable-cell date-cell column-heading">Provisional Letter</div>
+							<div class="Rtable-cell date-cell column-heading">Foreword Letter</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText, enrollment_no: filterText, country_name: filterText, specialization: filterText, course: filterText} | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Date</div>
+								<div class="Rtable-cell--content date-content">{{application?.date}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Eligblity Number</div>
+								<div class="Rtable-cell--content date-content">
+									<mat-form-field class="example-full-width">
+									<input matInput placeholder="Eligbility Number" id='eligib_numbericcr{{application.id}}'>
+									</mat-form-field>
+									<span id="elignumber_iccrerror{{application.id}}"></span>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Remark</div>
+								<div class="Rtable-cell--content date-content">
+									<textarea id='eligib_remarkiccr{{application.id}}' [rows]="2" [cols]="15" pInputTextarea autoResize="autoResize"></textarea>
+									<span id="eligremarkiccrerror{{application.id}}"></span>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" id='view_eligibilityiccr{{application.id}}' status="info" nbPopover="View More" nbPopoverMode="hover" (click)="viewMore('iccr',application.user_id,application.course_id,'new',application.id);"></i>
+									<i class="fa ion-android-lock" id='documentverifyiccr{{application.id}}' nbPopover="Errata" nbPopoverMode="hover" (click)="errata(application.user_id,'iccr');"></i>
+									<i class="fa ion-checkmark" id='acceptbuttoniccr{{application.id}}' nbPopover="Accept" nbPopoverMode="hover" (click)="acceptApplicationICCR(application.user_id,application.course_id,application.id);"></i>
+									<i class="fa ion-close-round" id='rejectbuttoniccr{{application.id}}' nbPopover = "Reject"  nbPopoverMode="hover" (click)="rejectApplicationICCR(application.user_id,application.course_id,application.id);"></i>
+									<div *ngIf="application.requestToReupload ==true">
+										<div>
+											<span style="color: red;">You have requested {{application.stu_name}} to re-upload transcript !</span>
+										</div>	
+									</div>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Provisional Letter</div>
+								<div class="Rtable-cell--content date-content">
+										<!-- (click)="DownloadICCRProvisionalLetter(application.user_id,application.id)" -->
+									<a href="{{oldserverUrl}}/upload/transcript_iccr_student/{{application?.user_id}}/{{application?.id}}_Confirmation_provisional_Letter.pdf">
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;">
+									</a>
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Foreword Letter</div>
+								<div class="Rtable-cell--content date-content">
+									<a href="{{oldserverUrl}}/upload/transcript_iccr_student/{{application?.user_id}}/{{application?.id}}_Forward_Letter.pdf">
+											<!-- (click)=downloadICCRForewordLetter(application.pdf,application.file_name) -->
+										<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:30px; width:30px;">
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel header="ICCR Student Allocated">
+				<b><h3>ICCR College Allocated Student's</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYearICCR('iccr_allocated_college_data',$event)" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Application No.</div>
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell date-cell column-heading">Selected Course</div>
+							<div class="Rtable-cell date-cell column-heading">Country</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Action(Final Letter Download)</div>
+							<div class="Rtable-cell date-cell column-heading">College allocation</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{stu_name: filterText, enrollment_no: filterText, country_name: filterText, specialization: filterText, course: filterText, email: filterText, collegename: filterText} | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Application No.</div>
+								<div class="Rtable-cell--content date-content">{{application?.enrollment_no}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+									<div class="Rtable-cell--heading">Student Name</div>
+									<div class="Rtable-cell--content date-content">{{application?.stu_name}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Selected Course</div>
+								<div class="Rtable-cell--content date-content">{{application?.specialization}} <br> ({{application?.course}})</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Country</div>
+								<div class="Rtable-cell--content date-content">{{application?.country_name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action(Final Letter Download)</div>
+								<div class="Rtable-cell--content date-content">
+									<img src="https://mu.admissiondesk.org/uiserver/front_assets/img/pdf1.png"  style="height:50px; width:50px;" (click)="DownloadFirmPDFICCR(application?.id,application?.user_id)">
+								</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">College allocation</div>
+								<div class="Rtable-cell--content date-content" *ngIf = "application?.collegename!=null || application?.collegename!=undefined || application?.collegename!=''">
+									{{application?.collegename}}
+								</div>
+								<div class="Rtable-cell--content date-content" *ngIf = "application?.collegename == null || application?.collegename == undefined || application?.collegename ==''">
+									:Pending
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+			<p-tabPanel header="ICCR Re-Uploaded Transcripts">
+				<b><h3>ICCR Re-Uploaded Transcripts of Student's</h3></b><br>
+				<div class="row">
+					<div class="col-lg-6 ">
+						<mat-form-field class="example-full-width">
+							<input matInput  type="text" [value]="filterText"
+							[placeholder]="filterPlaceholder" [formControl]="filterInput" />
+						</mat-form-field>
+					</div>
+					<div class="col-lg-3 ">
+						<mat-form-field>
+							<mat-select placeholder="select Year"[(ngModel)]="selectedYear" name="selectedYear" id="yearCtrl"  (ngModelChange)="filterYearICCR('iccr_requested_unlocked_transcript',$event)" >
+								<mat-option value="2018">2018-2019</mat-option>
+								<mat-option value="2019">2019-2020</mat-option>
+							</mat-select>
+						</mat-form-field>
+					</div>
+				</div>
+				<div class="wrapper">
+					<h5><b>Total Count:</b></h5>{{application_data?.length}}
+					<div class="Rtable Rtable--5cols Rtable--collapse">
+						<div class="Rtable-row Rtable-row--head">
+							<div class="Rtable-cell date-cell column-heading">Student Name</div>
+							<div class="Rtable-cell topic-cell column-heading">Email Address</div>
+							<div class="Rtable-cell date-cell column-heading">Mobile Country Code</div>
+							<div class="Rtable-cell date-cell column-heading">Mobile</div>
+							<div class="Rtable-cell date-cell column-heading">Action</div>
+						</div>
+						
+						<div class="Rtable-row is-striped" *ngFor="let application of application_data | filter:{name: filterText, email: filterText, mobile_country_code: filterText,mobile: filterText} | paginate: { itemsPerPage: 10, currentPage: p }">
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Student Name</div>
+								<div class="Rtable-cell--content date-content">{{application?.name}}</div>
+							</div>
+							<div class="Rtable-cell topic-cell">
+								<div class="Rtable-cell--content title-content">{{application?.email}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Mobile Country Code</div>
+								<div class="Rtable-cell--content date-content">{{application?.mobile_country_code}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Mobile</div>
+								<div class="Rtable-cell--content date-content">{{application?.mobile}}</div>
+							</div>
+							<div class="Rtable-cell date-cell">
+								<div class="Rtable-cell--heading">Action</div>
+								<div class="Rtable-cell--content date-content">
+									<i class="fa ion-person" status="danger" nbPopover="View More" nbPopoverMode="hover" (click)="view_reupload_transcript(application?.user_id,'iccr');"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<pagination-controls (pageChange)="p = $event"></pagination-controls>
+			</p-tabPanel>
+		</p-tabView>    
+   </nb-card-body>
+</nb-card>
+<div>
+	<p-confirmDialog #cd header="Confirmation" icon="pi pi-exclamation-triangle">
+		<p-footer>
+			<button type="button" pButton  label="OK" (click)="cd.accept()"></button>
+		</p-footer>
+	</p-confirmDialog>
+</div>	
